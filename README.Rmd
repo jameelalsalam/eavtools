@@ -14,42 +14,67 @@ knitr::opts_chunk$set(
 ```
 # eavtools
 
-The goal of eavtools is to provide shims to dplyr functions to work with data in Entity-Attribute-Value format *as if* it were tidy.
+The goal of eavtools is to provide utility functions for working with data in Entity-Attribute-Value format *as if* it were tidy.
 
 ## Installation
 
-You can (cannot) install the released version of eavtools from [CRAN](https://CRAN.R-project.org) with:
+You can install the development version of this package from github with:
 
 ``` r
-install.packages("eavtools")
+# install.packages("devtools")
+devtools::install_github("jameelalsalam/eavtools")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Entity-attribute value can be a convenient format for storing many different variables about model aspect. Using the key-value pair of columns `variable` and `value` is the marker for entity-attribute-value formatted data:
 
 ```{r example}
 ## basic example code
 library(tidyverse)
 library(eavtools)
 
-tinyeav <- tiny %>%
-	new_tbl_eav("empid", "var", "value")
+eav_emissions
+```
 
-tinyeav
+
+One common need for data in this format is to perform calculations across a group of rows. For example, what does each model project for the change in emissions from 2015 to 2030?
+
+
+```{r}
+eav_emissions %>%
+	filter(model!= "m3") %>%
+	group_by(model) %>%
+	summarize(emissions_change = value[variable == "emissions" & year == 2030] / value[variable == "emissions" & year == 2015])
+```
+
+There are a couple of problems here:
+
+- I don't find it easy to read.
+- This type of code doesn't handle missing or duplicate values well. If a value is _implicitly_ missing (e.g., there is no row corresponding to the selected years/variables) then the code will throw an error. Summarize needs something length 1, not length 0.
+
+```{r, error=TRUE}
+eav_emissions %>%
+	filter(model== "m3") %>%
+	group_by(model) %>%
+	summarize(emissions_change = value[variable == "emissions" & year == 2030] / value[variable == "emissions" & year == 2015])
 ```
 
 ```{r}
-str(tinyeav)
+eav_emissions %>%
+	group_by(model) %>%
+	summarize(emissions_change = 
+							value %forwhich% (variable == "emissions" & year == 2030) /
+							value %forwhich% (variable == "emissions" & year == 2015))
 ```
 
+Using the `%forwhich%` function in this package solves the error behavior, but it does not solve the readability issue. This type of code scales up:
+
 ```{r}
-tiny %>%
-	dplyr::group_by(empid) %>%
-	dplyr::summarize(
-		first  = value %forwhich% (var == "first"),
-		middle = value %forwhich% (var == "middle"),
-		last   = value %forwhich% (var == "last")
-	)
+eav_emissions %>%
+	group_by(model, variable) %>%
+	summarize(change_2015_to_2030 = 
+							value %forwhich% (year == 2030) /
+							value %forwhich% (year == 2015))
 ```
 

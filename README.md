@@ -3,21 +3,25 @@
 
 # eavtools
 
-The goal of eavtools is to provide shims to dplyr functions to work with
+The goal of eavtools is to provide utility functions for working with
 data in Entity-Attribute-Value format *as if* it were tidy.
 
 ## Installation
 
-You can (cannot) install the released version of eavtools from
-[CRAN](https://CRAN.R-project.org) with:
+You can install the development version of this package from github
+with:
 
 ``` r
-install.packages("eavtools")
+# install.packages("devtools")
+devtools::install_github("jameelalsalam/eavtools")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Entity-attribute value can be a convenient format for storing many
+different variables about model aspect. Using the key-value pair of
+columns `variable` and `value` is the marker for entity-attribute-value
+formatted data:
 
 ``` r
 ## basic example code
@@ -32,43 +36,85 @@ library(tidyverse)
 #> x dplyr::lag()    masks stats::lag()
 library(eavtools)
 
-tinyeav <- tiny %>%
-    new_tbl_eav("empid", "var", "value")
+eav_emissions
+#> # A tibble: 8 x 4
+#>   model  year variable  value
+#> * <chr> <int> <chr>     <int>
+#> 1 m1     2015 emissions   100
+#> 2 m1     2015 energy       80
+#> 3 m1     2030 emissions   120
+#> 4 m1     2030 energy      100
+#> 5 m2     2015 emissions    90
+#> 6 m2     2030 emissions   130
+#> 7 m3     2015 emissions   105
+#> 8 m3     2015 energy      100
+```
 
-tinyeav
+One common need for data in this format is to perform calculations
+across a group of rows. For example, what does each model project for
+the change in emissions from 2015 to 2030?
+
+``` r
+eav_emissions %>%
+    filter(model!= "m3") %>%
+    group_by(model) %>%
+    summarize(emissions_change = value[variable == "emissions" & year == 2030] / value[variable == "emissions" & year == 2015])
+#> # A tibble: 2 x 2
+#>   model emissions_change
+#>   <chr>            <dbl>
+#> 1 m1                1.2 
+#> 2 m2                1.44
+```
+
+There are a couple of problems here:
+
+  - I don’t find it easy to read.
+  - This type of code doesn’t handle missing or duplicate values well.
+    If a value is *implicitly* missing (e.g., there is no row
+    corresponding to the selected years/variables) then the code will
+    throw an error. Summarize needs something length 1, not length 0.
+
+<!-- end list -->
+
+``` r
+eav_emissions %>%
+    filter(model== "m3") %>%
+    group_by(model) %>%
+    summarize(emissions_change = value[variable == "emissions" & year == 2030] / value[variable == "emissions" & year == 2015])
+#> Error in summarise_impl(.data, dots): Column `emissions_change` must be length 1 (a summary value), not 0
+```
+
+``` r
+eav_emissions %>%
+    group_by(model) %>%
+    summarize(emissions_change = 
+                            value %forwhich% (variable == "emissions" & year == 2030) /
+                            value %forwhich% (variable == "emissions" & year == 2015))
+#> # A tibble: 3 x 2
+#>   model emissions_change
+#>   <chr>            <dbl>
+#> 1 m1                1.2 
+#> 2 m2                1.44
+#> 3 m3               NA
+```
+
+Using the `%forwhich%` function in this package solves the error
+behavior, but it does not solve the readability issue. This type of code
+scales up:
+
+``` r
+eav_emissions %>%
+    group_by(model, variable) %>%
+    summarize(change_2015_to_2030 = 
+                            value %forwhich% (year == 2030) /
+                            value %forwhich% (year == 2015))
 #> # A tibble: 5 x 3
-#>   empid var   value  
-#>   <int> <chr> <chr>  
-#> 1   100 first John   
-#> 2   100 last  Smith  
-#> 3   101 first Jane   
-#> 4   101 last  <NA>   
-#> 5   102 first Madonna
-```
-
-``` r
-str(tinyeav)
-#> Classes 'tbl_eav', 'tbl_df', 'tbl' and 'data.frame': 5 obs. of  3 variables:
-#>  $ empid: int  100 100 101 101 102
-#>  $ var  : chr  "first" "last" "first" "last" ...
-#>  $ value: chr  "John" "Smith" "Jane" NA ...
-#>  - attr(*, "entity_cols")= chr "empid"
-#>  - attr(*, "attr_cols")= chr "var"
-#>  - attr(*, "val_cols")= chr "value"
-```
-
-``` r
-tiny %>%
-    dplyr::group_by(empid) %>%
-    dplyr::summarize(
-        first  = value %forwhich% (var == "first"),
-        middle = value %forwhich% (var == "middle"),
-        last   = value %forwhich% (var == "last")
-    )
-#> # A tibble: 3 x 4
-#>   empid first   middle last 
-#>   <int> <chr>   <chr>  <chr>
-#> 1   100 John    <NA>   Smith
-#> 2   101 Jane    <NA>   <NA> 
-#> 3   102 Madonna <NA>   <NA>
+#> # Groups:   model [?]
+#>   model variable  change_2015_to_2030
+#>   <chr> <chr>                   <dbl>
+#> 1 m1    emissions                1.2 
+#> 2 m1    energy                   1.25
+#> 3 m2    emissions                1.44
+#> 4 m3    emissions               NA   
+#> 5 m3    energy                  NA
 ```
