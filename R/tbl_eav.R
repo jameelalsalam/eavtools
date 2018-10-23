@@ -1,5 +1,5 @@
 
-
+#' @export
 new_tbl_eav <- function(.data, entity_cols, attr_cols, val_cols) {
 	# check types of inputs? Or not even?
 

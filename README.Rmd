@@ -43,4 +43,13 @@ tinyeav
 str(tinyeav)
 ```
 
+```{r}
+tiny %>%
+	dplyr::group_by(empid) %>%
+	dplyr::summarize(
+		first  = value %forwhich% (var == "first"),
+		middle = value %forwhich% (var == "middle"),
+		last   = value %forwhich% (var == "last")
+	)
+```
 
