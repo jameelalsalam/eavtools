@@ -6,18 +6,15 @@
 #' @param ... filter conditions
 #' @export
 #'
-#' - Needs to recognize attribute column values as columns
-#' - Needs to reorganize conditions based on attribute/value columns
+#' 1) First strategy: pivot to a 'tidy' df, then filter, then go back.
+#' 2) Operate on the groups, using summarize to find groups to keep
+#'
+#'
 #'
 #' @examples
-#' tinyeav %>% filter_eav(first == "John")
+#' eav_tiny %>% filter_eav(first == "John")
 #'
-#' tinyeav %>%
-#'   filter(var == "first", value == "John") %>% {
-#'   semi_join(tinyeav, ., by = "empid")
-#'   }
-#'
-#' tinyeav %>% filter_eav(is.na(last))
+#' eav_tiny %>% filter_eav(is.na(last))
 #'
 #' # only gets explicit NA
 #' tinyeav %>%
@@ -59,11 +56,14 @@
 #'
 filter_eav <- function(.data, ...) {
 
-	dots <- quos(...)
+	t_data <- eav_to_tidy(.data)
 
-	cond <- enquo(.c)
+	t_data_filtered <- dplyr::filter(t_data, ...)
 
-	# need to recognize not just
+	res <- tidy_to_eav(t_data_filtered, orig = .data)
 
+	res
 }
+
+
 

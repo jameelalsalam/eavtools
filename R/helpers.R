@@ -1,6 +1,11 @@
 
 #' Helper to replace empty lists
 #'
+#'@importFrom vctrs %0%
+#'@export
+vctrs::`%0%`
+
+#' @export
 `%|||%` <- function (x, y)
 {
 	if (is_empty(x)) {

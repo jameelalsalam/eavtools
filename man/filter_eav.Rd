@@ -17,14 +17,9 @@ filter_eav(.data, ...)
 Filter an EAV tibble
 }
 \examples{
-tinyeav \%>\% filter_eav(first == "John")
+eav_tiny \%>\% filter_eav(first == "John")
 
-tinyeav \%>\%
-  filter(var == "first", value == "John") \%>\% {
-  semi_join(tinyeav, ., by = "empid")
-  }
-
-tinyeav \%>\% filter_eav(is.na(last))
+eav_tiny \%>\% filter_eav(is.na(last))
 
 # only gets explicit NA
 tinyeav \%>\%

@@ -13,5 +13,6 @@ LazyData: true
 Imports: 
     tibble,
     dplyr,
-    tidyselect
-RoxygenNote: 6.1.0
+    tidyselect,
+    rlang
+RoxygenNote: 6.1.1
