@@ -71,11 +71,8 @@ filter_eav.default <- function(.data, ...) {
 
 #' @export
 filter_eav.tbl_eav <- function(.data, ...) {
-	dots <- enexprs(...)
 
-	dots <- map(dots, ~recurse_rewrite(.x))
-
-	newdata <- dplyr::filter(.data, !!!dots)
+	newdata <- NextMethod()
 
 	res <- reconstruct(newdata, .data)
 
