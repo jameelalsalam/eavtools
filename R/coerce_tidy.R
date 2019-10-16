@@ -1,6 +1,6 @@
 
-#' assumes `value` and `variable` columns
-#' eav_to_tidy(eav_tiny)
+# assumes `value` and `variable` columns
+# eav_to_tidy(eav_tiny)
 #' @import rlang
 eav_to_tidy <- function(data, id_cols = NULL) {
 
@@ -13,7 +13,7 @@ eav_to_tidy <- function(data, id_cols = NULL) {
 
 }
 
-#' tidy_to_eav(eav_to_tidy(eav_tiny), eav_tiny)
+# tidy_to_eav(eav_to_tidy(eav_tiny), eav_tiny)
 #' @import dplyr
 tidy_to_eav <- function(data, orig = NULL, id_cols = NULL) {
 

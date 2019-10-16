@@ -4,7 +4,8 @@
 \alias{tbl_eav}
 \title{Make an EAV tibble out of a regular tibble}
 \usage{
-tbl_eav(.data, id_cols, variable_col, value_col)
+tbl_eav(.data, id_cols = NULL, variable_col = c("variable", "var"),
+  value_col = "value")
 }
 \arguments{
 \item{.data}{starting tibble in EAV format}

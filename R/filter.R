@@ -53,14 +53,31 @@
 #'   semi_join(tinyeav, ., by = "empid")}
 #'
 #'
-#'
+#' @export
 filter_eav <- function(.data, ...) {
+	UseMethod("filter_eav")
+}
 
+#' @export
+filter_eav.default <- function(.data, ...) {
 	dots <- enexprs(...)
 
 	dots <- map(dots, ~recurse_rewrite(.x))
 
 	res <- dplyr::filter(.data, !!!dots)
+
+	res
+}
+
+#' @export
+filter_eav.tbl_eav <- function(.data, ...) {
+	dots <- enexprs(...)
+
+	dots <- map(dots, ~recurse_rewrite(.x))
+
+	newdata <- dplyr::filter(.data, !!!dots)
+
+	res <- reconstruct(newdata, .data)
 
 	res
 }
