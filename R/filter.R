@@ -12,7 +12,7 @@
 #'
 #'
 #' @examples
-#' eav_tiny %>% filter_eav(first == "John")
+#' eav_tiny %>% group_by(empid) %>% filter_eav(lu("first") == "John")
 #'
 #' eav_tiny %>% filter_eav(is.na(last))
 #'
@@ -55,6 +55,19 @@
 #'
 #'
 filter_eav <- function(.data, ...) {
+
+	dots <- enexprs(...)
+
+	dots <- map(dots, ~recurse_rewrite(.x))
+
+	res <- dplyr::filter(.data, !!!dots)
+
+	res
+}
+
+# old strategy: transform to tidy, then eval
+# problem with old strategy: not clear *what* tidy is necessary. That's part of why we are in EAV format.
+filter_eav2 <- function(.data, ...) {
 
 	t_data <- eav_to_tidy(.data)
 

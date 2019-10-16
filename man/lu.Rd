@@ -11,5 +11,5 @@ Lookup a an EAV value-variable pair when inside a tidyeval context
 }
 \examples{
 eav_tiny \%>\% group_by(empid) \%>\% mutate(last = lu("last"))
-eav_tiny \%>\% group_by(empid) \%>\% filter(lu("last") == "Smith")
+eav_tiny \%>\% group_by(empid) \%>\% filter_eav(lu("last") == "Smith")
 }

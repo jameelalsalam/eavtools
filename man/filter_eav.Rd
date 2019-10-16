@@ -17,7 +17,7 @@ filter_eav(.data, ...)
 Filter an EAV tibble
 }
 \examples{
-eav_tiny \%>\% filter_eav(first == "John")
+eav_tiny \%>\% group_by(empid) \%>\% filter_eav(lu("first") == "John")
 
 eav_tiny \%>\% filter_eav(is.na(last))
 
