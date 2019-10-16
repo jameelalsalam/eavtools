@@ -21,6 +21,28 @@ new_tbl_eav <- function(.data, id_cols, variable_col, value_col) {
 #'
 #' Columns may be specified using character vectors or (hopefully) tidyselect semantics.
 #' @export
-tbl_eav <- function(.data, id_cols, variable_col, value_col) {
-	stop("not impl")
+tbl_eav <- function(.data,
+										id_cols = NULL,
+										variable_col = c("variable", "var"),
+										value_col = "value") {
+	id_cols <- as.character(id_cols)
+	variable_col <- as.character(variable_col)
+	value_col <- as.character(value_col)
+
+	variable_col <- intersect(names(.data), variable_col)
+	value_col <- intersect(names(.data), value_col)
+
+	if(is_empty(variable_col)) stop("No variable column found in EAV data.")
+	if(is_empty(value_col)) stop("No variable column found in EAV data.")
+
+	if(is_empty(id_cols)) {
+		id_cols <- setdiff(names(.data), c(variable_col, value_col))
+	}
+
+	new_tbl_eav(
+		.data = .data,
+		id_cols = id_cols,
+		variable_col = variable_col,
+		value_col = value_col
+	)
 }
