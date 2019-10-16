@@ -4,18 +4,18 @@
 \alias{tbl_eav}
 \title{Make an EAV tibble out of a regular tibble}
 \usage{
-tbl_eav(.data, entity_cols, attr_cols, val_cols)
+tbl_eav(.data, id_cols, variable_col, value_col)
 }
 \arguments{
 \item{.data}{starting tibble in EAV format}
 
-\item{entity_cols}{specification of columns which represent entities}
+\item{id_cols}{specification of columns which represent entities}
 
-\item{attr_cols}{spec of columns which represent attributes}
+\item{variable_col}{spec of column which represent variable names}
 
-\item{val_cols}{spec of columns which represent values
+\item{value_col}{spec of column which represent values
 
-Columns may be specified using character vectors or tidyselect semantics.}
+Columns may be specified using character vectors or (hopefully) tidyselect semantics.}
 }
 \description{
 Make an EAV tibble out of a regular tibble

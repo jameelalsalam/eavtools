@@ -14,7 +14,8 @@ Imports:
     tibble,
     dplyr,
     tidyselect,
-    rlang
+    rlang,
+    tibbletime
 RoxygenNote: 6.1.1
 Suggests: 
     testthat (>= 2.1.0)
